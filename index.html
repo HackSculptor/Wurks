@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Tracker Fun Edition - Login</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background: linear-gradient(135deg, #74ABE2, #5563DE); color: #333; padding: 20px; min-height: 100vh; }
+    .container { max-width: 800px; margin: auto; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
+    h1, h2 { text-align: center; margin-bottom: 20px; color: #2c3e50; }
+    /* Authentication Section */
+    #authSection { text-align: center; }
+    #authSection form { max-width: 300px; margin: auto; }
+    #authSection p { margin: 10px 0; }
+    button.reset-accounts { background: #e74c3c; border: none; color: #fff; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: background 0.3s; margin-top: 15px; }
+    button.reset-accounts:hover { background: #c0392b; }
+    /* Tutorial Styles */
+    #tutorial {
+      margin-top: 20px;
+      background: #f0f8ff;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    #tutorial h2 { font-size: 20px; margin-bottom: 10px; }
+    #tutorial p { margin-bottom: 8px; line-height: 1.5; }
+    /* Workspace Header */
+    #workspaceHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    #logoutBtn { background: #e74c3c; border: none; color: #fff; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+    #logoutBtn:hover { background: #c0392b; }
+    /* Tabs */
+    .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ccc; }
+    .tab-button { flex: 1; padding: 10px; font-size: 16px; text-align: center; cursor: pointer; background: #f7f7f7; border: none; border-bottom: 2px solid transparent; transition: background 0.3s, border-bottom 0.3s; }
+    .tab-button.active { background: #fff; border-bottom: 2px solid #5563DE; font-weight: 500; }
+    /* Forms */
+    form input, form select { width: 100%; padding: 10px; font-size: 16px; border: 2px solid #ccc; border-radius: 6px; margin-bottom: 10px; transition: border-color 0.3s ease; }
+    form input:focus, form select:focus { outline: none; border-color: #5563DE; }
+    form button { padding: 10px 20px; font-size: 16px; background: #5563DE; color: #fff; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease; }
+    form button:hover { background: #4453c2; transform: scale(1.05); }
+    /* Task/Card Styles */
+    .task-list { margin-top: 20px; }
+    .task { border: 2px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #fafafa; animation: fadeIn 0.5s ease-in-out; transition: background 0.3s ease; }
+    .task:hover { background: #f0f0f0; }
+    .task-details { margin-bottom: 10px; }
+    .task-details p { margin: 5px 0; }
+    .task button { padding: 8px 14px; font-size: 14px; background: #2ecc71; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin-right: 5px; transition: background 0.3s ease, transform 0.2s ease; }
+    .task button:hover { background: #27ae60; transform: scale(1.05); }
+    .delete-btn { background: #e74c3c; }
+    .delete-btn:hover { background: #c0392b; }
+    .reset-btn { background: #f39c12; border: none; color: #fff; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: background 0.3s ease, transform 0.2s ease; margin-bottom: 10px; }
+    .reset-btn:hover { background: #d35400; transform: scale(1.02); }
+    .completed { text-decoration: line-through; opacity: 0.6; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .section { display: none; }
+    .section.active { display: block; }
+    /* Study Corner Styles */
+    .study-corner { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; display: flex; }
+    .study-input { flex: 1; margin-right: 10px; display: flex; flex-direction: column; }
+    .study-input textarea { resize: vertical; padding: 5px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    .study-input button { margin-top: 5px; padding: 5px 10px; background: #5563DE; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+    .study-input button:hover { background: #4453c2; }
+    .study-notes-list { flex: 1; border-left: 1px solid #ccc; padding-left: 10px; max-height: 150px; overflow-y: auto; }
+    .study-note { margin-bottom: 5px; padding: 5px; border-bottom: 1px dashed #aaa; font-size: 12px; }
+    #studyCornerList { margin-top: 10px; }
+    .study-note-agg { padding: 5px; border-bottom: 1px solid #ccc; font-size: 13px; }
+    /* Reddit Search Tab Styles */
+    #redditSearch form { max-width: 500px; margin: auto; display: flex; }
+    #redditSearch input { flex: 1; }
+    #redditResults { margin-top: 15px; }
+    #redditResults a { display: block; padding: 5px; border-bottom: 1px solid #ddd; color: #0079d3; text-decoration: none; }
+    #redditResults a:hover { background: #f0f0f0; }
+    #savedRedditResults { margin-top: 15px; }
+    #savedRedditResults h3 { margin-bottom: 10px; text-align: center; }
+    .reddit-saved { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid #ddd; }
+    .reddit-saved a { color: #0079d3; text-decoration: none; flex: 1; }
+    .reddit-saved button { background: #e74c3c; border: none; color: #fff; padding: 5px 8px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+    .reddit-saved button:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+  <!-- Authentication Section -->
+  <div id="authSection" class="container">
+    <div id="loginContainer">
+      <h2>Log In</h2>
+      <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit">Log In</button>
+      </form>
+      <p>Don't have an account? <button id="showSignUpBtn">Sign Up</button></p>
+    </div>
+    <div id="signUpContainer" style="display:none;">
+      <h2>Sign Up</h2>
+      <form id="signUpForm">
+        <input type="text" id="signUpUsername" placeholder="Choose Username" required>
+        <input type="password" id="signUpPassword" placeholder="Choose Password" required>
+        <button type="submit">Sign Up</button>
+      </form>
+      <p>Already have an account? <button id="showLoginBtn">Log In</button></p>
+    </div>
+    <!-- Tutorial Section -->
+    <div id="tutorial">
+      <h2>Welcome to Course Tracker!</h2>
+      <p>This platform helps you manage your courses, track your progress, and even search for relevant discussions on Reddit.</p>
+      <p>To get started, please log in or sign up. Once authenticated, you'll have access to your personal dashboard where you can add courses, mark them as complete, and manage study notes.</p>
+    </div>
+  </div>
+  
+  <!-- Workspace Section -->
+  <div id="workspaceSection" class="container" style="display:none;">
+    <div id="workspaceHeader">
+      <h1>Course Tracker 🚀</h1>
+      <button id="logoutBtn">Log Out</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-button active" data-tab="active">Courses</button>
+      <button class="tab-button" data-tab="completed">Completed Courses</button>
+      <button class="tab-button" data-tab="deleted">Died Wurks</button>
+      <button class="tab-button" data-tab="studyCorner">Study Corner</button>
+      <button class="tab-button" data-tab="redditSearch">Reddit Search</button>
+    </div>
+    <div id="active" class="section active">
+      <form id="courseForm">
+        <input type="text" id="courseName" placeholder="Course Name" required>
+        <input type="text" id="category" placeholder="Category" required>
+        <input type="number" id="duration" placeholder="Duration (days)" required>
+        <button type="submit">Add Course</button>
+      </form>
+      <div class="task-list" id="activeTaskList"></div>
+    </div>
+    <div id="completed" class="section">
+      <div class="task-list" id="completedTaskList"></div>
+    </div>
+    <div id="deleted" class="section">
+      <button id="resetDeleted" class="reset-btn">Reset Died Wurks</button>
+      <div class="task-list" id="deletedTaskList"></div>
+    </div>
+    <div id="studyCorner" class="section">
+      <button id="resetStudyCorner" class="reset-btn">Reset All Study Notes</button>
+      <p style="margin-bottom:10px; font-size:14px;">This will clear study notes for all courses.</p>
+      <div id="studyCornerList"></div>
+    </div>
+    <!-- Reddit Search Tab -->
+    <div id="redditSearch" class="section">
+      <h2>Reddit Search</h2>
+      <form id="redditSearchForm">
+        <input type="text" id="redditQuery" placeholder="Search Reddit..." required>
+        <button type="submit">Search</button>
+      </form>
+      <div id="redditResults"></div>
+      <div id="savedRedditResults">
+        <h3>Saved Reddit Results</h3>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // --- Authentication ---
+    const authSection = document.getElementById('authSection');
+    const loginContainer = document.getElementById('loginContainer');
+    const signUpContainer = document.getElementById('signUpContainer');
+    const loginForm = document.getElementById('loginForm');
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+    const signUpForm = document.getElementById('signUpForm');
+    const signUpUsername = document.getElementById('signUpUsername');
+    const signUpPassword = document.getElementById('signUpPassword');
+    const showSignUpBtn = document.getElementById('showSignUpBtn');
+    const showLoginBtn = document.getElementById('showLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    let currentUser = localStorage.getItem('currentUser');
+    
+    function showWorkspace() {
+      authSection.style.display = 'none';
+      workspaceSection.style.display = 'block';
+      loadUserData();
+      renderSavedReddit();
+    }
+    
+    function showAuth() {
+      authSection.style.display = 'block';
+      workspaceSection.style.display = 'none';
+    }
+    
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = loginUsername.value.trim();
+      const password = loginPassword.value;
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        currentUser = username;
+        localStorage.setItem('currentUser', currentUser);
+        showWorkspace();
+      } else {
+        alert("Invalid credentials!");
+      }
+    });
+    
+    signUpForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = signUpUsername.value.trim();
+      const password = signUpPassword.value;
+      if (users.find(u => u.username === username)) {
+        alert("Username already exists!");
+        return;
+      }
+      users.push({ username, password });
+      localStorage.setItem('users', JSON.stringify(users));
+      currentUser = username;
+      localStorage.setItem('currentUser', currentUser);
+      showWorkspace();
+    });
+    
+    showSignUpBtn.addEventListener('click', () => {
+      loginContainer.style.display = 'none';
+      signUpContainer.style.display = 'block';
+    });
+    
+    showLoginBtn.addEventListener('click', () => {
+      signUpContainer.style.display = 'none';
+      loginContainer.style.display = 'block';
+    });
+    
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('currentUser');
+      currentUser = null;
+      location.reload();
+    });
+    
+    // --- Workspace Functionality ---
+    const workspaceSection = document.getElementById('workspaceSection');
+    let tasks = [];
+    let deletedTasks = [];
+    let redditSaved = JSON.parse(localStorage.getItem('redditSaved_' + currentUser)) || [];
+    
+    function loadUserData() {
+      tasks = JSON.parse(localStorage.getItem('tasks_' + currentUser)) || [];
+      deletedTasks = JSON.parse(localStorage.getItem('deletedTasks_' + currentUser)) || [];
+      renderAll();
+    }
+    
+    function updateLocalStorage() {
+      localStorage.setItem('tasks_' + currentUser, JSON.stringify(tasks));
+      localStorage.setItem('deletedTasks_' + currentUser, JSON.stringify(deletedTasks));
+      localStorage.setItem('redditSaved_' + currentUser, JSON.stringify(redditSaved));
+    }
+    
+    function calculateElapsedDays(createdAt) {
+      const createdDate = new Date(createdAt);
+      const now = new Date();
+      const diffTime = now - createdDate;
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    }
+    
+    function renderStudyCorner(course) {
+      if (!course.studyNotes) course.studyNotes = [];
+      const studyDiv = document.createElement('div');
+      studyDiv.className = 'study-corner';
+      const inputDiv = document.createElement('div');
+      inputDiv.className = 'study-input';
+      const textarea = document.createElement('textarea');
+      textarea.placeholder = "Write your note here...";
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = "Save Note";
+      saveBtn.addEventListener('click', () => {
+        if (textarea.value.trim() === "") return;
+        const note = { text: textarea.value.trim(), timestamp: new Date().toISOString() };
+        course.studyNotes.push(note);
+        textarea.value = "";
+        updateLocalStorage();
+        notesList.innerHTML = "";
+        course.studyNotes.forEach(note => {
+          const noteDiv = document.createElement('div');
+          noteDiv.className = 'study-note';
+          noteDiv.textContent = `${note.text} (${new Date(note.timestamp).toLocaleString()})`;
+          notesList.appendChild(noteDiv);
+        });
+        renderStudyCornerTab();
+      });
+      inputDiv.appendChild(textarea);
+      inputDiv.appendChild(saveBtn);
+      const notesList = document.createElement('div');
+      notesList.className = 'study-notes-list';
+      course.studyNotes.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'study-note';
+        noteDiv.textContent = `${note.text} (${new Date(note.timestamp).toLocaleString()})`;
+        notesList.appendChild(noteDiv);
+      });
+      studyDiv.appendChild(inputDiv);
+      studyDiv.appendChild(notesList);
+      return studyDiv;
+    }
+    
+    function renderActiveTasks() {
+      const activeTaskList = document.getElementById('activeTaskList');
+      activeTaskList.innerHTML = '';
+      tasks.filter(task => !task.completed).forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task';
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'task-details';
+        const elapsedDays = calculateElapsedDays(task.createdAt);
+        detailsDiv.innerHTML = `
+          <p><strong>Course:</strong> ${task.courseName}</p>
+          <p><strong>Category:</strong> ${task.category}</p>
+          <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
+          <p><strong>Status:</strong> Pending ⏳</p>
+          <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
+        `;
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = 'Complete';
+        completeBtn.addEventListener('click', () => {
+          task.completed = true;
+          updateLocalStorage();
+          renderAll();
+        });
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.addEventListener('click', () => {
+          const reason = prompt("Enter reason for deletion:");
+          if (!reason || reason.trim() === "") return;
+          task.deleteReason = reason;
+          task.deletedAt = new Date().toISOString();
+          deletedTasks.push(task);
+          tasks.splice(index, 1);
+          updateLocalStorage();
+          renderAll();
+        });
+        const studyCornerBtn = document.createElement('button');
+        studyCornerBtn.textContent = 'Study Corner';
+        studyCornerBtn.addEventListener('click', () => {
+          task.showStudyCorner = !task.showStudyCorner;
+          updateLocalStorage();
+          renderAll();
+        });
+        taskDiv.appendChild(detailsDiv);
+        taskDiv.appendChild(completeBtn);
+        taskDiv.appendChild(deleteBtn);
+        taskDiv.appendChild(studyCornerBtn);
+        if (task.showStudyCorner) {
+          taskDiv.appendChild(renderStudyCorner(task));
+        }
+        activeTaskList.appendChild(taskDiv);
+      });
+    }
+    
+    function renderCompletedTasks() {
+      const completedTaskList = document.getElementById('completedTaskList');
+      completedTaskList.innerHTML = '';
+      tasks.filter(task => task.completed).forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task';
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'task-details completed';
+        const elapsedDays = calculateElapsedDays(task.createdAt);
+        detailsDiv.innerHTML = `
+          <p><strong>Course:</strong> ${task.courseName}</p>
+          <p><strong>Category:</strong> ${task.category}</p>
+          <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
+          <p><strong>Status:</strong> Completed 🎉</p>
+          <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
+        `;
+        const undoBtn = document.createElement('button');
+        undoBtn.textContent = 'Undo';
+        undoBtn.addEventListener('click', () => {
+          task.completed = false;
+          updateLocalStorage();
+          renderAll();
+        });
+        const studyCornerBtn = document.createElement('button');
+        studyCornerBtn.textContent = 'Study Corner';
+        studyCornerBtn.addEventListener('click', () => {
+          task.showStudyCorner = !task.showStudyCorner;
+          updateLocalStorage();
+          renderAll();
+        });
+        taskDiv.appendChild(detailsDiv);
+        taskDiv.appendChild(undoBtn);
+        taskDiv.appendChild(studyCornerBtn);
+        if (task.showStudyCorner) {
+          taskDiv.appendChild(renderStudyCorner(task));
+        }
+        completedTaskList.appendChild(taskDiv);
+      });
+    }
+    
+    function renderDeletedTasks() {
+      const deletedTaskList = document.getElementById('deletedTaskList');
+      deletedTaskList.innerHTML = '';
+      deletedTasks.forEach(task => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task';
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'task-details';
+        const elapsedDays = calculateElapsedDays(task.createdAt);
+        const deletionDate = new Date(task.deletedAt).toLocaleDateString();
+        detailsDiv.innerHTML = `
+          <p><strong>Course:</strong> ${task.courseName}</p>
+          <p><strong>Category:</strong> ${task.category}</p>
+          <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
+          <p><strong>Deleted On:</strong> ${deletionDate}</p>
+          <p><strong>Reason:</strong> ${task.deleteReason}</p>
+          <p><strong>Elapsed Days (Active):</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
+        `;
+        taskDiv.appendChild(detailsDiv);
+        deletedTaskList.appendChild(taskDiv);
+      });
+    }
+    
+    function renderStudyCornerTab() {
+      const studyCornerList = document.getElementById('studyCornerList');
+      studyCornerList.innerHTML = "";
+      tasks.forEach(task => {
+        if (task.studyNotes && task.studyNotes.length > 0) {
+          task.studyNotes.forEach(note => {
+            const noteDiv = document.createElement('div');
+            noteDiv.className = 'study-note-agg';
+            noteDiv.textContent = `Course: ${task.courseName} - ${note.text} (${new Date(note.timestamp).toLocaleString()})`;
+            studyCornerList.appendChild(noteDiv);
+          });
+        }
+      });
+    }
+    
+    function renderSavedReddit() {
+      const savedRedditDiv = document.getElementById('savedRedditResults');
+      savedRedditDiv.innerHTML = "<h3>Saved Reddit Results</h3>";
+      if (redditSaved.length === 0) {
+        savedRedditDiv.innerHTML += "<p>No saved results.</p>";
+        return;
+      }
+      redditSaved.forEach((post, index) => {
+        const postDiv = document.createElement('div');
+        postDiv.className = "reddit-saved";
+        const postLink = document.createElement('a');
+        postLink.href = post.url;
+        postLink.target = "_blank";
+        postLink.textContent = `${post.title} (Saved on ${new Date(post.savedAt).toLocaleString()})`;
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = "Delete";
+        deleteBtn.addEventListener('click', () => {
+          redditSaved.splice(index, 1);
+          updateLocalStorage();
+          renderSavedReddit();
+        });
+        postDiv.appendChild(postLink);
+        postDiv.appendChild(deleteBtn);
+        savedRedditDiv.appendChild(postDiv);
+      });
+    }
+    
+    function renderAll() {
+      renderActiveTasks();
+      renderCompletedTasks();
+      renderDeletedTasks();
+      renderStudyCornerTab();
+    }
+    
+    // --- Reddit Search Feature ---
+    const redditSearchForm = document.getElementById('redditSearchForm');
+    const redditQuery = document.getElementById('redditQuery');
+    const redditResults = document.getElementById('redditResults');
+    
+    redditSearchForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const query = redditQuery.value.trim();
+      if (!query) return;
+      redditResults.innerHTML = "<p>Loading...</p>";
+      try {
+        const response = await fetch("https://www.reddit.com/search.json?q=" + encodeURIComponent(query));
+        const data = await response.json();
+        const posts = data.data.children;
+        redditResults.innerHTML = "";
+        if (posts.length === 0) {
+          redditResults.innerHTML = "<p>No results found.</p>";
+          return;
+        }
+        posts.slice(0, 5).forEach(post => {
+          const postData = post.data;
+          const resultDiv = document.createElement('div');
+          resultDiv.style.display = "flex";
+          resultDiv.style.alignItems = "center";
+          resultDiv.style.justifyContent = "space-between";
+          const postLink = document.createElement('a');
+          postLink.href = "https://reddit.com" + postData.permalink;
+          postLink.target = "_blank";
+          postLink.textContent = postData.title;
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = "Save";
+          saveBtn.style.marginLeft = "10px";
+          saveBtn.addEventListener('click', () => {
+            const savedPost = {
+              title: postData.title,
+              url: "https://reddit.com" + postData.permalink,
+              savedAt: new Date().toISOString()
+            };
+            redditSaved.push(savedPost);
+            updateLocalStorage();
+            renderSavedReddit();
+          });
+          resultDiv.appendChild(postLink);
+          resultDiv.appendChild(saveBtn);
+          redditResults.appendChild(resultDiv);
+        });
+      } catch (err) {
+        redditResults.innerHTML = "<p>Error fetching results.</p>";
+      }
+    });
+    
+    // --- Tab Switching ---
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const sections = document.querySelectorAll('.section');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        sections.forEach(section => section.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(button.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+    
+    const resetDeleted = document.getElementById('resetDeleted');
+    const resetStudyCorner = document.getElementById('resetStudyCorner');
+    resetDeleted.addEventListener('click', () => {
+      if (confirm("Are you sure you want to reset Died Wurks? This cannot be undone.")) {
+        deletedTasks = [];
+        updateLocalStorage();
+        renderAll();
+      }
+    });
+    resetStudyCorner.addEventListener('click', () => {
+      if (confirm("Are you sure you want to reset all Study Corner notes for all courses? This cannot be undone.")) {
+        tasks.forEach(task => { task.studyNotes = []; });
+        updateLocalStorage();
+        renderAll();
+      }
+    });
+    
+    const courseForm = document.getElementById('courseForm');
+    courseForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const courseName = document.getElementById('courseName').value;
+      const category = document.getElementById('category').value;
+      const duration = document.getElementById('duration').value;
+      const newTask = { 
+        courseName, 
+        category, 
+        duration, 
+        createdAt: new Date().toISOString(), 
+        completed: false,
+        studyNotes: [],
+        showStudyCorner: false 
+      };
+      tasks.push(newTask);
+      updateLocalStorage();
+      courseForm.reset();
+      renderAll();
+    });
+    
+    if (currentUser) {
+      authSection.style.display = 'none';
+      workspaceSection.style.display = 'block';
+      loadUserData();
+      redditSaved = JSON.parse(localStorage.getItem('redditSaved_' + currentUser)) || [];
+      renderSavedReddit();
+    } else {
+      authSection.style.display = 'block';
+      workspaceSection.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
