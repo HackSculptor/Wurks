@@ -58,12 +58,12 @@
     .section { display: none; }
     .section.active { display: block; }
     /* Study Corner Styles */
-    .study-corner { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; display: flex; }
-    .study-input { flex: 1; margin-right: 10px; display: flex; flex-direction: column; }
+    .study-corner { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; display: flex; flex-direction: column; }
+    .study-input { margin-bottom: 10px; display: flex; flex-direction: column; }
     .study-input textarea { resize: vertical; padding: 5px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
     .study-input button { margin-top: 5px; padding: 5px 10px; background: #5563DE; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
     .study-input button:hover { background: #4453c2; }
-    .study-notes-list { flex: 1; border-left: 1px solid #ccc; padding-left: 10px; max-height: 150px; overflow-y: auto; }
+    .study-notes-list { border-left: 1px solid #ccc; padding-left: 10px; max-height: 150px; overflow-y: auto; }
     .study-note { margin-bottom: 5px; padding: 5px; border-bottom: 1px dashed #aaa; font-size: 12px; }
     #studyCornerList { margin-top: 10px; }
     .study-note-agg { padding: 5px; border-bottom: 1px solid #ccc; font-size: 13px; }
@@ -258,10 +258,13 @@
       return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     }
     
+    // --- Updated Study Corner Rendering with Download Feature ---
     function renderStudyCorner(course) {
       if (!course.studyNotes) course.studyNotes = [];
       const studyDiv = document.createElement('div');
       studyDiv.className = 'study-corner';
+      
+      // Input section to add new notes
       const inputDiv = document.createElement('div');
       inputDiv.className = 'study-input';
       const textarea = document.createElement('textarea');
@@ -274,6 +277,7 @@
         course.studyNotes.push(note);
         textarea.value = "";
         updateLocalStorage();
+        // Refresh the notes list
         notesList.innerHTML = "";
         course.studyNotes.forEach(note => {
           const noteDiv = document.createElement('div');
@@ -285,6 +289,8 @@
       });
       inputDiv.appendChild(textarea);
       inputDiv.appendChild(saveBtn);
+      
+      // Display existing study notes
       const notesList = document.createElement('div');
       notesList.className = 'study-notes-list';
       course.studyNotes.forEach(note => {
@@ -293,8 +299,34 @@
         noteDiv.textContent = `${note.text} (${new Date(note.timestamp).toLocaleString()})`;
         notesList.appendChild(noteDiv);
       });
+      
+      // Create a download button to export study notes as a text file
+      const downloadBtn = document.createElement('button');
+      downloadBtn.textContent = "Download Notes";
+      downloadBtn.style.marginTop = "10px";
+      downloadBtn.addEventListener('click', () => {
+        if (course.studyNotes.length === 0) {
+          alert("No notes to download for this course.");
+          return;
+        }
+        let textContent = "";
+        course.studyNotes.forEach(note => {
+          textContent += `- ${note.text} (Saved on ${new Date(note.timestamp).toLocaleString()})\n`;
+        });
+        const blob = new Blob([textContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${course.courseName.replace(/\s+/g, '_')}_study_notes.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+      
       studyDiv.appendChild(inputDiv);
       studyDiv.appendChild(notesList);
+      studyDiv.appendChild(downloadBtn);
       return studyDiv;
     }
     
