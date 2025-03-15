@@ -468,29 +468,26 @@
     // --- New Progress Rendering ---
     function renderProgress() {
       const progressSection = document.getElementById('progress');
-      // Clear previous progress content (except header)
       progressSection.innerHTML = '<h2>Progress</h2>';
-      // Group tasks by category. For each category, count the number of completed tasks.
       const categoryCounts = {};
       
-      // Loop over all tasks (active tasks include pending and completed tasks)
+      // Normalize and count completed tasks by category
       tasks.forEach(task => {
-        // Initialize category count if not present.
-        if (!categoryCounts[task.category]) {
-          categoryCounts[task.category] = 0;
+        const category = task.category.trim().toLowerCase();
+        if (!categoryCounts[category]) {
+          categoryCounts[category] = 0;
         }
-        // If the task is completed, increase the count.
         if (task.completed) {
-          categoryCounts[task.category]++;
+          categoryCounts[category]++;
         }
       });
       
-      // Display the results.
-      for (const category in categoryCounts) {
+      Object.keys(categoryCounts).forEach(category => {
+        const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
         const p = document.createElement('p');
-        p.textContent = `${category}: ${categoryCounts[category]} completed`;
+        p.textContent = `${formattedCategory}: ${categoryCounts[category]} completed`;
         progressSection.appendChild(p);
-      }
+      });
     }
     
     function renderAll() {
