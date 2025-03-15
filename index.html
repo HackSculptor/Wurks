@@ -58,12 +58,12 @@
     .section { display: none; }
     .section.active { display: block; }
     /* Study Corner Styles */
-    .study-corner { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; display: flex; flex-direction: column; }
-    .study-input { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .study-corner { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc; display: flex; }
+    .study-input { flex: 1; margin-right: 10px; display: flex; flex-direction: column; }
     .study-input textarea { resize: vertical; padding: 5px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
     .study-input button { margin-top: 5px; padding: 5px 10px; background: #5563DE; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
     .study-input button:hover { background: #4453c2; }
-    .study-notes-list { border-left: 1px solid #ccc; padding-left: 10px; max-height: 150px; overflow-y: auto; }
+    .study-notes-list { flex: 1; border-left: 1px solid #ccc; padding-left: 10px; max-height: 150px; overflow-y: auto; }
     .study-note { margin-bottom: 5px; padding: 5px; border-bottom: 1px dashed #aaa; font-size: 12px; }
     #studyCornerList { margin-top: 10px; }
     .study-note-agg { padding: 5px; border-bottom: 1px solid #ccc; font-size: 13px; }
@@ -79,6 +79,8 @@
     .reddit-saved a { color: #0079d3; text-decoration: none; flex: 1; }
     .reddit-saved button { background: #e74c3c; border: none; color: #fff; padding: 5px 8px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
     .reddit-saved button:hover { background: #c0392b; }
+    /* Progress Section Styles */
+    #progress p { font-size: 16px; margin: 5px 0; }
   </style>
 </head>
 <body>
@@ -122,6 +124,7 @@
       <button class="tab-button" data-tab="deleted">Died Wurks</button>
       <button class="tab-button" data-tab="studyCorner">Study Corner</button>
       <button class="tab-button" data-tab="redditSearch">Reddit Search</button>
+      <button class="tab-button" data-tab="progress">Progress</button>
     </div>
     <div id="active" class="section active">
       <form id="courseForm">
@@ -155,6 +158,11 @@
       <div id="savedRedditResults">
         <h3>Saved Reddit Results</h3>
       </div>
+    </div>
+    <!-- Progress Section -->
+    <div id="progress" class="section">
+      <h2>Progress</h2>
+      <!-- Progress details will be injected here -->
     </div>
   </div>
   
@@ -258,13 +266,10 @@
       return Math.floor(diffTime / (1000 * 60 * 60 * 24));
     }
     
-    // --- Updated Study Corner Rendering with Download Feature ---
     function renderStudyCorner(course) {
       if (!course.studyNotes) course.studyNotes = [];
       const studyDiv = document.createElement('div');
       studyDiv.className = 'study-corner';
-      
-      // Input section to add new notes
       const inputDiv = document.createElement('div');
       inputDiv.className = 'study-input';
       const textarea = document.createElement('textarea');
@@ -277,7 +282,6 @@
         course.studyNotes.push(note);
         textarea.value = "";
         updateLocalStorage();
-        // Refresh the notes list
         notesList.innerHTML = "";
         course.studyNotes.forEach(note => {
           const noteDiv = document.createElement('div');
@@ -289,8 +293,6 @@
       });
       inputDiv.appendChild(textarea);
       inputDiv.appendChild(saveBtn);
-      
-      // Display existing study notes
       const notesList = document.createElement('div');
       notesList.className = 'study-notes-list';
       course.studyNotes.forEach(note => {
@@ -299,34 +301,8 @@
         noteDiv.textContent = `${note.text} (${new Date(note.timestamp).toLocaleString()})`;
         notesList.appendChild(noteDiv);
       });
-      
-      // Create a download button to export study notes as a text file
-      const downloadBtn = document.createElement('button');
-      downloadBtn.textContent = "Download Notes";
-      downloadBtn.style.marginTop = "10px";
-      downloadBtn.addEventListener('click', () => {
-        if (course.studyNotes.length === 0) {
-          alert("No notes to download for this course.");
-          return;
-        }
-        let textContent = "";
-        course.studyNotes.forEach(note => {
-          textContent += `- ${note.text} (Saved on ${new Date(note.timestamp).toLocaleString()})\n`;
-        });
-        const blob = new Blob([textContent], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${course.courseName.replace(/\s+/g, '_')}_study_notes.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      });
-      
       studyDiv.appendChild(inputDiv);
       studyDiv.appendChild(notesList);
-      studyDiv.appendChild(downloadBtn);
       return studyDiv;
     }
     
@@ -489,11 +465,40 @@
       });
     }
     
+    // --- New Progress Rendering ---
+    function renderProgress() {
+      const progressSection = document.getElementById('progress');
+      // Clear previous progress content (except header)
+      progressSection.innerHTML = '<h2>Progress</h2>';
+      // Group tasks by category. For each category, count the number of completed tasks.
+      const categoryCounts = {};
+      
+      // Loop over all tasks (active tasks include pending and completed tasks)
+      tasks.forEach(task => {
+        // Initialize category count if not present.
+        if (!categoryCounts[task.category]) {
+          categoryCounts[task.category] = 0;
+        }
+        // If the task is completed, increase the count.
+        if (task.completed) {
+          categoryCounts[task.category]++;
+        }
+      });
+      
+      // Display the results.
+      for (const category in categoryCounts) {
+        const p = document.createElement('p');
+        p.textContent = `${category}: ${categoryCounts[category]} completed`;
+        progressSection.appendChild(p);
+      }
+    }
+    
     function renderAll() {
       renderActiveTasks();
       renderCompletedTasks();
       renderDeletedTasks();
       renderStudyCornerTab();
+      renderProgress();
     }
     
     // --- Reddit Search Feature ---
