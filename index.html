@@ -318,98 +318,100 @@
       // Update the burden message on the active courses page
       document.getElementById('burdenMessageActive').textContent = checkBurden();
       
-      tasks.filter(task => !task.completed).forEach(task => {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task';
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'task-details';
-        const elapsedDays = calculateElapsedDays(task.createdAt);
-        detailsDiv.innerHTML = `
-          <p><strong>Course:</strong> ${task.courseName}</p>
-          <p><strong>Category:</strong> ${task.category}</p>
-          <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
-          <p><strong>Status:</strong> Pending ⏳</p>
-          <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
-        `;
-        const completeBtn = document.createElement('button');
-        completeBtn.textContent = 'Complete';
-        completeBtn.addEventListener('click', () => {
-          task.completed = true;
-          updateLocalStorage();
-          renderAll();
-        });
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.classList.add('delete-btn');
-        deleteBtn.addEventListener('click', () => {
-          const reason = prompt("Enter reason for deletion:");
-          if (!reason || reason.trim() === "") return;
-          task.deleteReason = reason;
-          task.deletedAt = new Date().toISOString();
-          deletedTasks.push(task);
-          // Find the index of the task in the full tasks array and remove it
-          const indexInTasks = tasks.indexOf(task);
-          if (indexInTasks > -1) {
-            tasks.splice(indexInTasks, 1);
+      // Iterate over all tasks (with index) and render those not completed
+      tasks.forEach((task, index) => {
+        if (!task.completed) {
+          const taskDiv = document.createElement('div');
+          taskDiv.className = 'task';
+          const detailsDiv = document.createElement('div');
+          detailsDiv.className = 'task-details';
+          const elapsedDays = calculateElapsedDays(task.createdAt);
+          detailsDiv.innerHTML = `
+            <p><strong>Course:</strong> ${task.courseName}</p>
+            <p><strong>Category:</strong> ${task.category}</p>
+            <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
+            <p><strong>Status:</strong> Pending ⏳</p>
+            <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
+          `;
+          const completeBtn = document.createElement('button');
+          completeBtn.textContent = 'Complete';
+          completeBtn.addEventListener('click', () => {
+            task.completed = true;
+            updateLocalStorage();
+            renderAll();
+          });
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.classList.add('delete-btn');
+          deleteBtn.addEventListener('click', () => {
+            const reason = prompt("Enter reason for deletion:");
+            if (!reason || reason.trim() === "") return;
+            task.deleteReason = reason;
+            task.deletedAt = new Date().toISOString();
+            deletedTasks.push(task);
+            // Remove the task using its index from the main tasks array
+            tasks.splice(index, 1);
+            updateLocalStorage();
+            renderAll();
+          });
+          const studyCornerBtn = document.createElement('button');
+          studyCornerBtn.textContent = 'Study Corner';
+          studyCornerBtn.addEventListener('click', () => {
+            task.showStudyCorner = !task.showStudyCorner;
+            updateLocalStorage();
+            renderAll();
+          });
+          taskDiv.appendChild(detailsDiv);
+          taskDiv.appendChild(completeBtn);
+          taskDiv.appendChild(deleteBtn);
+          taskDiv.appendChild(studyCornerBtn);
+          if (task.showStudyCorner) {
+            taskDiv.appendChild(renderStudyCorner(task));
           }
-          updateLocalStorage();
-          renderAll();
-        });
-        const studyCornerBtn = document.createElement('button');
-        studyCornerBtn.textContent = 'Study Corner';
-        studyCornerBtn.addEventListener('click', () => {
-          task.showStudyCorner = !task.showStudyCorner;
-          updateLocalStorage();
-          renderAll();
-        });
-        taskDiv.appendChild(detailsDiv);
-        taskDiv.appendChild(completeBtn);
-        taskDiv.appendChild(deleteBtn);
-        taskDiv.appendChild(studyCornerBtn);
-        if (task.showStudyCorner) {
-          taskDiv.appendChild(renderStudyCorner(task));
+          activeTaskList.appendChild(taskDiv);
         }
-        activeTaskList.appendChild(taskDiv);
       });
     }
     
     function renderCompletedTasks() {
       const completedTaskList = document.getElementById('completedTaskList');
       completedTaskList.innerHTML = '';
-      tasks.filter(task => task.completed).forEach(task => {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task';
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'task-details completed';
-        const elapsedDays = calculateElapsedDays(task.createdAt);
-        detailsDiv.innerHTML = `
-          <p><strong>Course:</strong> ${task.courseName}</p>
-          <p><strong>Category:</strong> ${task.category}</p>
-          <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
-          <p><strong>Status:</strong> Completed 🎉</p>
-          <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
-        `;
-        const undoBtn = document.createElement('button');
-        undoBtn.textContent = 'Undo';
-        undoBtn.addEventListener('click', () => {
-          task.completed = false;
-          updateLocalStorage();
-          renderAll();
-        });
-        const studyCornerBtn = document.createElement('button');
-        studyCornerBtn.textContent = 'Study Corner';
-        studyCornerBtn.addEventListener('click', () => {
-          task.showStudyCorner = !task.showStudyCorner;
-          updateLocalStorage();
-          renderAll();
-        });
-        taskDiv.appendChild(detailsDiv);
-        taskDiv.appendChild(undoBtn);
-        taskDiv.appendChild(studyCornerBtn);
-        if (task.showStudyCorner) {
-          taskDiv.appendChild(renderStudyCorner(task));
+      tasks.forEach((task, index) => {
+        if (task.completed) {
+          const taskDiv = document.createElement('div');
+          taskDiv.className = 'task';
+          const detailsDiv = document.createElement('div');
+          detailsDiv.className = 'task-details completed';
+          const elapsedDays = calculateElapsedDays(task.createdAt);
+          detailsDiv.innerHTML = `
+            <p><strong>Course:</strong> ${task.courseName}</p>
+            <p><strong>Category:</strong> ${task.category}</p>
+            <p><strong>Duration:</strong> ${task.duration} day${task.duration > 1 ? 's' : ''}</p>
+            <p><strong>Status:</strong> Completed 🎉</p>
+            <p><strong>Elapsed Days:</strong> ${elapsedDays} day${elapsedDays === 1 ? '' : 's'}</p>
+          `;
+          const undoBtn = document.createElement('button');
+          undoBtn.textContent = 'Undo';
+          undoBtn.addEventListener('click', () => {
+            task.completed = false;
+            updateLocalStorage();
+            renderAll();
+          });
+          const studyCornerBtn = document.createElement('button');
+          studyCornerBtn.textContent = 'Study Corner';
+          studyCornerBtn.addEventListener('click', () => {
+            task.showStudyCorner = !task.showStudyCorner;
+            updateLocalStorage();
+            renderAll();
+          });
+          taskDiv.appendChild(detailsDiv);
+          taskDiv.appendChild(undoBtn);
+          taskDiv.appendChild(studyCornerBtn);
+          if (task.showStudyCorner) {
+            taskDiv.appendChild(renderStudyCorner(task));
+          }
+          completedTaskList.appendChild(taskDiv);
         }
-        completedTaskList.appendChild(taskDiv);
       });
     }
     
