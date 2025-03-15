@@ -82,6 +82,8 @@
     /* Progress Section Styles */
     #progress p { font-size: 16px; margin: 5px 0; }
     #burdenMessage { font-weight: bold; margin-top: 10px; }
+    /* Active Courses Burden Message */
+    #burdenMessageActive { font-weight: bold; margin: 10px 0; text-align: center; }
   </style>
 </head>
 <body>
@@ -134,6 +136,8 @@
         <input type="number" id="duration" placeholder="Duration (days)" required>
         <button type="submit">Add Course</button>
       </form>
+      <!-- Burden message displayed above the courses list -->
+      <div id="burdenMessageActive"></div>
       <div class="task-list" id="activeTaskList"></div>
     </div>
     <div id="completed" class="section">
@@ -310,7 +314,11 @@
     function renderActiveTasks() {
       const activeTaskList = document.getElementById('activeTaskList');
       activeTaskList.innerHTML = '';
-      tasks.filter(task => !task.completed).forEach((task, index) => {
+      
+      // Update the burden message on the active courses page
+      document.getElementById('burdenMessageActive').textContent = checkBurden();
+      
+      tasks.filter(task => !task.completed).forEach(task => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task';
         const detailsDiv = document.createElement('div');
@@ -339,7 +347,11 @@
           task.deleteReason = reason;
           task.deletedAt = new Date().toISOString();
           deletedTasks.push(task);
-          tasks.splice(index, 1);
+          // Find the index of the task in the full tasks array and remove it
+          const indexInTasks = tasks.indexOf(task);
+          if (indexInTasks > -1) {
+            tasks.splice(indexInTasks, 1);
+          }
           updateLocalStorage();
           renderAll();
         });
@@ -364,7 +376,7 @@
     function renderCompletedTasks() {
       const completedTaskList = document.getElementById('completedTaskList');
       completedTaskList.innerHTML = '';
-      tasks.filter(task => task.completed).forEach((task, index) => {
+      tasks.filter(task => task.completed).forEach(task => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task';
         const detailsDiv = document.createElement('div');
@@ -503,7 +515,7 @@
         progressSection.appendChild(p);
       });
       
-      // Append the burden message based on active tasks
+      // Append the burden message in progress section (if desired)
       const burdenMessage = document.createElement('p');
       burdenMessage.id = 'burdenMessage';
       burdenMessage.textContent = checkBurden();
