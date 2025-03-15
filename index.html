@@ -81,6 +81,7 @@
     .reddit-saved button:hover { background: #c0392b; }
     /* Progress Section Styles */
     #progress p { font-size: 16px; margin: 5px 0; }
+    #burdenMessage { font-weight: bold; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -162,7 +163,7 @@
     <!-- Progress Section -->
     <div id="progress" class="section">
       <h2>Progress</h2>
-      <!-- Progress details will be injected here -->
+      <!-- Progress details and burden message will be injected here -->
     </div>
   </div>
   
@@ -465,7 +466,20 @@
       });
     }
     
-    // --- New Progress Rendering ---
+    // --- New Progress Rendering and Burden Check ---
+    function checkBurden() {
+      // Count active tasks (not completed)
+      const activeCount = tasks.filter(task => !task.completed).length;
+      
+      if (activeCount > 10) {
+        return "You are in burden so complete it fast!";
+      } else if (activeCount < 2) {
+        return "You are too much free—find some work!";
+      } else {
+        return "Good work going on, I guess!";
+      }
+    }
+    
     function renderProgress() {
       const progressSection = document.getElementById('progress');
       progressSection.innerHTML = '<h2>Progress</h2>';
@@ -488,6 +502,12 @@
         p.textContent = `${formattedCategory}: ${categoryCounts[category]} completed`;
         progressSection.appendChild(p);
       });
+      
+      // Append the burden message based on active tasks
+      const burdenMessage = document.createElement('p');
+      burdenMessage.id = 'burdenMessage';
+      burdenMessage.textContent = checkBurden();
+      progressSection.appendChild(burdenMessage);
     }
     
     function renderAll() {
